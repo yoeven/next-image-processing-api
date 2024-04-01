@@ -1,5 +1,7 @@
 # Next Image Processing
 
+![](/public/testimage.jpg?raw=true)
+
 Blazing fast image processing/transformations and CDN running on Vercel edge functions using Rust and WebAssembly.
 
 Image processing powered by [Photon](https://github.com/silvia-odwyer/photon)⚡

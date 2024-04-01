@@ -1,6 +1,6 @@
 # Next Image Processing
 
-<img src="/public/testimage.jpg?raw=true" height="100"/>
+<img src="/public/testimage.jpg?raw=true" height="500"/>
 
 
 Blazing fast image processing/transformations and CDN running on Vercel edge functions using Rust and WebAssembly.

@@ -1,7 +1,6 @@
-# Next Image Processing
+# Next Image Processing API
 
 <img src="/public/testimage.jpg?raw=true" height="500"/>
-
 
 Blazing fast image processing/transformations and CDN running on Vercel edge functions using Rust and WebAssembly.
 
@@ -16,7 +15,6 @@ Image processing powered by [Photon](https://github.com/silvia-odwyer/photon)⚡
 - 🔁 Replacement for `next/image` processing on Vercel
 - 🔗 Local and remote image processing
 - 🧩 Fully managed API coming soon to [JigsawStack](https://jigsawstack.com)
-
 
 ## Usage
 The image processing API can be hosted on your own Vercel project which would also work on Cloudflare Pages/Workers, as long there is support for Edge functions. This API is on the Next.js, hosted on Vercel.

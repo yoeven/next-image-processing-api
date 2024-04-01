@@ -31,18 +31,22 @@ export const config = {
 const handler = async (req: NextRequest) => {
   const searchParams = req.nextUrl.searchParams;
   const queryParams = Object.fromEntries(searchParams.entries());
-  const params = ImageTransformSchema.parse(queryParams);
+  const { url, ...params } = ImageTransformSchema.parse(queryParams);
 
   console.log("params", params);
 
   try {
-    const imageUrl = params.url?.startsWith("/") ? `${req.nextUrl.origin}${params.url}` : params.url;
+    const imageUrl = url?.startsWith("/") ? `${req.nextUrl.origin}${url}` : url;
 
     if (!imageUrl) {
       throw new Error(`Image URL is required`);
     }
 
     const imageResp = await fetch(imageUrl);
+
+    if (!imageResp.ok) {
+      throw new Error(`Failed to fetch image`);
+    }
 
     const contentType = imageResp.headers.get("content-type");
     const ext = imageUrl.split(".").pop()?.toLowerCase();
@@ -53,6 +57,18 @@ const handler = async (req: NextRequest) => {
     }
 
     const bytes = await imageResp.arrayBuffer().then((buffer) => new Uint8Array(buffer));
+
+    if (Object.keys(params).length === 0) {
+      console.log("No params, returning original image");
+      return new NextResponse(Buffer.from(bytes), {
+        status: 200,
+        headers: {
+          "Content-Type": contentType || "image/jpeg",
+          "cache-control": "public, s-maxage=2592000",
+        },
+      });
+    }
+
     let outputImage = PhotonImage.new_from_byteslice(bytes);
 
     if (params.width || params.height) {

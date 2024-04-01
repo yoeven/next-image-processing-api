@@ -1,0 +1,29 @@
+{
+  "name": "next-image-processing-api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@cf-wasm/photon": "^0.1.12",
+    "next": "14.1.4",
+    "react": "^18",
+    "react-dom": "^18",
+    "tinycolor2": "^1.6.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/tinycolor2": "^1.4.6",
+    "eslint": "^8",
+    "eslint-config-next": "14.1.4",
+    "prettier": "^3.2.5",
+    "typescript": "^5"
+  }
+}

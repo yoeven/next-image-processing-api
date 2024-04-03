@@ -17,11 +17,14 @@ import {
   padding_uniform,
   rotate,
   saturate_hsl,
+  desaturate_hsl,
   sharpen,
   tint,
+  darken_hsl,
 } from "@cf-wasm/photon/next";
 import { ImageTransformSchema } from "src/photon/client";
-import { autoResize, imageToFormat, parseColorToPhotonRGB } from "src/photon";
+import { autoResize, imageToFormat, tinyColorToPhotonRGBA } from "src/photon";
+import tinycolor from "tinycolor2";
 
 export const config = {
   runtime: "edge",
@@ -29,13 +32,13 @@ export const config = {
 };
 
 const handler = async (req: NextRequest) => {
-  const searchParams = req.nextUrl.searchParams;
-  const queryParams = Object.fromEntries(searchParams.entries());
-  const { url, ...params } = ImageTransformSchema.parse(queryParams);
-
-  console.log("params", params);
-
   try {
+    const searchParams = req.nextUrl.searchParams;
+    const queryParams = Object.fromEntries(searchParams.entries());
+    const { url, ...params } = ImageTransformSchema.parse(queryParams);
+
+    console.log("params", params);
+
     const imageUrl = url?.startsWith("/") ? `${req.nextUrl.origin}${url}` : url;
 
     if (!imageUrl) {
@@ -98,25 +101,25 @@ const handler = async (req: NextRequest) => {
 
       const [top, right, bottom, left] = paddingSplit;
 
-      const color = parseColorToPhotonRGB(params?.padding_color, "black");
+      const color = params?.padding_color || tinycolor("black");
 
       if (paddingSplit.every((val, i, arr) => val === arr[0])) {
-        outputImage = padding_uniform(outputImage, top, color);
+        outputImage = padding_uniform(outputImage, top, tinyColorToPhotonRGBA(color));
       } else {
         if (top) {
-          outputImage = padding_top(outputImage, top, color);
+          outputImage = padding_top(outputImage, top, tinyColorToPhotonRGBA(color));
         }
 
         if (right) {
-          outputImage = padding_right(outputImage, right, color);
+          outputImage = padding_right(outputImage, right, tinyColorToPhotonRGBA(color));
         }
 
         if (bottom) {
-          outputImage = padding_bottom(outputImage, bottom, color);
+          outputImage = padding_bottom(outputImage, bottom, tinyColorToPhotonRGBA(color));
         }
 
         if (left) {
-          outputImage = padding_left(outputImage, left, color);
+          outputImage = padding_left(outputImage, left, tinyColorToPhotonRGBA(color));
         }
       }
     }
@@ -127,18 +130,13 @@ const handler = async (req: NextRequest) => {
 
     if (params.crop) {
       const cropSplit = params.crop.split(",").map((a) => parseFloat(a));
-
-      if (cropSplit.length < 4) {
-        throw new Error("Invalid crop values");
-      }
-
       const [x, y, cropWidth, cropHeight] = cropSplit;
       outputImage = crop(outputImage, x, y, cropWidth, cropHeight);
     }
 
     if (params.blur) {
       if (params.blur === "gaussian") {
-        gaussian_blur(outputImage, params.blur_radius || 5);
+        gaussian_blur(outputImage, params.blur_radius || 1);
       } else if (params.blur === "box") {
         box_blur(outputImage);
       }
@@ -153,20 +151,28 @@ const handler = async (req: NextRequest) => {
     }
 
     if (params.brightness) {
-      inc_brightness(outputImage, params.brightness);
+      if (params.brightness < 0) {
+        darken_hsl(outputImage, Math.abs(params.brightness) / 100);
+      } else {
+        inc_brightness(outputImage, params.brightness);
+      }
     }
 
     if (params.hue) {
-      hue_rotate_hsl(outputImage, params.hue);
+      hue_rotate_hsl(outputImage, Math.abs(params.hue) / 100);
     }
 
     if (params.saturation) {
-      saturate_hsl(outputImage, params.saturation);
+      if (params.saturation < 0) {
+        desaturate_hsl(outputImage, Math.abs(params.saturation) / 100);
+      } else {
+        saturate_hsl(outputImage, Math.abs(params.saturation) / 100);
+      }
     }
 
     if (params.tint) {
-      const colorRGB = parseColorToPhotonRGB(params.tint);
-      tint(outputImage, colorRGB.get_red(), colorRGB.get_green(), colorRGB.get_blue());
+      const colorRGB = params.tint.toRgb();
+      tint(outputImage, colorRGB.r, colorRGB.g, colorRGB.b);
     }
 
     if (params.grayscale) {

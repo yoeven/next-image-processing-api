@@ -87,26 +87,9 @@ export const calculateImageSize = (
   // return newSize;
 };
 
-export const parseColorToPhotonRGB = (color?: string, defaultColor?: string) => {
-  let selectedColor = defaultColor;
-
-  if (color) {
-    selectedColor = color?.includes(",") ? `rgba(${color})` : color;
-  }
-
-  if (!selectedColor) {
-    throw new Error("Invalid color values");
-  }
-
-  const tintColor = tinycolor(selectedColor);
-
-  if (!tintColor.isValid()) {
-    throw new Error("Invalid color values");
-  }
-
-  const colorRGB = tintColor.toRgb();
-
-  return new Rgba(colorRGB.r, colorRGB.g, colorRGB.b, colorRGB.a);
+export const tinyColorToPhotonRGBA = (color: tinycolor.Instance) => {
+  const rgba = color.toRgb();
+  return new Rgba(rgba.r, rgba.g, rgba.b, rgba.a);
 };
 
 export const autoResize = (
@@ -115,7 +98,7 @@ export const autoResize = (
   newHeight?: number,
   options?: {
     fit?: "contain" | "cover" | "fill";
-    fit_cover_letterbox_color?: string;
+    fit_cover_letterbox_color?: tinycolor.Instance;
   }
 ) => {
   const currentWidth = image.get_width();
@@ -151,12 +134,15 @@ export const autoResize = (
     const paddingX = Math.floor((newWidth - updatedWidth) / 2);
     const paddingY = Math.floor((newHeight - updatedHeight) / 2);
 
-    const paddingColor = parseColorToPhotonRGB(options?.fit_cover_letterbox_color);
+    if (paddingY > 0) {
+      image = padding_top(image, paddingY, tinyColorToPhotonRGBA(options.fit_cover_letterbox_color));
+      image = padding_bottom(image, paddingY, tinyColorToPhotonRGBA(options.fit_cover_letterbox_color));
+    }
 
-    image = padding_top(image, paddingY, paddingColor);
-    image = padding_bottom(image, paddingY, paddingColor);
-    image = padding_left(image, paddingX, paddingColor);
-    image = padding_right(image, paddingX, paddingColor);
+    if (paddingX > 0) {
+      image = padding_left(image, paddingX, tinyColorToPhotonRGBA(options.fit_cover_letterbox_color));
+      image = padding_right(image, paddingX, tinyColorToPhotonRGBA(options.fit_cover_letterbox_color));
+    }
   } else if (fit === "cover") {
     //crop to center
     const cropX = Math.floor(updatedWidth - newWidth) / 2;

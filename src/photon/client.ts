@@ -20,12 +20,12 @@ export const ImageTransformSchema = z.object({
   width: z
     .string()
     .transform((v) => parseInt(v))
-    .pipe(z.number().min(1))
+    .pipe(z.number().min(1).max(5000))
     .optional(),
   height: z
     .string()
     .transform((v) => parseInt(v))
-    .pipe(z.number().min(1))
+    .pipe(z.number().min(1).max(5000))
     .optional(),
   fit: z.enum(["contain", "cover", "fill"]).optional(),
   fit_cover_letterbox_color: isColor.optional(),

@@ -120,7 +120,14 @@ const handler = async (req: NextRequest) => {
     }
 
     if (params.crop) {
+      const currentWidth = outputImage.get_width();
+      const currentHeight = outputImage.get_height();
       const [x, y, cropWidth, cropHeight] = params.crop;
+
+      if (x > currentWidth || y > currentHeight || cropWidth > currentWidth || cropHeight > currentHeight) {
+        throw new Error("Crop dimensions exceed image size");
+      }
+
       outputImage = crop(outputImage, x, y, cropWidth, cropHeight);
     }
 

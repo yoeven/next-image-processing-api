@@ -60,7 +60,7 @@ export const ImageTransformSchema = z.object({
   crop: z
     .string()
     .transform((v) => v.split(",").map((a) => parseFloat(a)))
-    .pipe(z.array(z.number()).min(4).max(4))
+    .pipe(z.tuple([z.number().min(0), z.number().min(0), z.number().min(1).max(5000), z.number().min(1).max(1000)]))
     .optional(),
   blur: z.enum(["gaussian", "box"]).optional(),
   blur_radius: z

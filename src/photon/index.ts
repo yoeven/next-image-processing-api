@@ -168,14 +168,13 @@ export const imageToFormat = (
     case "webp":
       outputBytes = image.get_bytes_webp();
       break;
+    default:
     case "jpeg":
       outputBytes = image.get_bytes_jpeg(options?.jpeg_quality || 100);
       break;
     case "png":
       outputBytes = image.get_bytes();
       break;
-    default:
-      throw new Error("Invalid format");
   }
 
   const outputBuffer = Buffer.from(outputBytes);

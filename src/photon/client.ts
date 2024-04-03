@@ -37,7 +37,20 @@ export const ImageTransformSchema = z.object({
     .string()
     .transform((v) => v && v.toLowerCase() === "true")
     .optional(),
-  padding: z.string().optional(),
+  padding: z
+    .string()
+    .transform((v) => {
+      const split = v.split(",").map((a) => parseFloat(a));
+      if (split.length < 4) {
+        const fillBy = 4 - split.length;
+        for (let i = 0; i < fillBy; i++) {
+          split.push(0);
+        }
+      }
+      return split;
+    })
+    .pipe(z.array(z.number()).min(4).max(4))
+    .optional(),
   padding_color: isColor.optional(),
   rotate: z
     .string()
@@ -46,7 +59,8 @@ export const ImageTransformSchema = z.object({
     .optional(),
   crop: z
     .string()
-    .refine((v) => v.split(",").length === 4, "Invalid crop values")
+    .transform((v) => v.split(",").map((a) => parseFloat(a)))
+    .pipe(z.array(z.number()).min(4).max(4))
     .optional(),
   blur: z.enum(["gaussian", "box"]).optional(),
   blur_radius: z

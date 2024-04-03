@@ -90,20 +90,11 @@ const handler = async (req: NextRequest) => {
     }
 
     if (params.padding) {
-      const paddingSplit = params.padding.split(",").map((a) => parseFloat(a));
-
-      if (paddingSplit.length < 4) {
-        const fillBy = 4 - paddingSplit.length;
-        for (let i = 0; i < fillBy; i++) {
-          paddingSplit.push(0);
-        }
-      }
-
-      const [top, right, bottom, left] = paddingSplit;
+      const [top, right, bottom, left] = params.padding;
 
       const color = params?.padding_color || tinycolor("black");
 
-      if (paddingSplit.every((val, i, arr) => val === arr[0])) {
+      if (params.padding.every((val, i, arr) => val === arr[0])) {
         outputImage = padding_uniform(outputImage, top, tinyColorToPhotonRGBA(color));
       } else {
         if (top) {
@@ -129,8 +120,7 @@ const handler = async (req: NextRequest) => {
     }
 
     if (params.crop) {
-      const cropSplit = params.crop.split(",").map((a) => parseFloat(a));
-      const [x, y, cropWidth, cropHeight] = cropSplit;
+      const [x, y, cropWidth, cropHeight] = params.crop;
       outputImage = crop(outputImage, x, y, cropWidth, cropHeight);
     }
 
